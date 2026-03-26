@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<!-- saved from url=(0014)about:internet -->
 <html lang=" en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NLP Class Project | Fall 2024 CSCI 5541 | University of Minnesota</title>
+  <title>NLP Class Project | Spring 2026 CSCI 5541 | University of Minnesota</title>
 
   <link rel="stylesheet" href="./files/bulma.min.css" />
 
@@ -13,68 +12,60 @@
   <link href="./files/css2" rel="stylesheet">
   <link href="./files/css" rel="stylesheet">
 
-
   <base href="." target="_blank"></head>
-
 
 <body>
   <div>
     <div class="wrapper">
-      <h1 style="font-family: &#39;Lato&#39;, sans-serif;">Your Title Here</h1>
-      <h4 style="font-family: &#39;Lato&#39;, sans-serif; ">Fall 2024 CSCI 5541 NLP: Class Project - University of Minnesota</h4>
-      <h4 style="font-family: &#39;Lato&#39;, sans-serif; ">Team Name</h4>
+      <h1 style="font-family: 'Lato', sans-serif;">
+        Risk-Adjusted Hallucination Detection for LLMs
+      </h1>
+
+      <h4 style="font-family: 'Lato', sans-serif;">
+        Spring 2026 CSCI 5541 NLP: Class Project - University of Minnesota
+      </h4>
+
+      <h4 style="font-family: 'Lato', sans-serif;">
+        Team AttentionForge
+      </h4>
 
       <div class="authors-wrapper">
         
         <div class="author-container">
-          <div class="author-image">
-                        
-              <img src="">
-            
-            
+          <div class="author-image">        
+              <img src="files/baanee.jpeg">
           </div>
-          <p>
-                        
-              Member 1
-            
+          <p>        
+              Baanee Singh
           </p>
         </div>
         
         <div class="author-container">
           <div class="author-image">
-            
-            <img src="">
-            
+            <img src="files/chinmay.jpeg" alt="Chinmay Arvind">
           </div>
           <p>
-            
-            Member 2
-            
+            Chinmay Arvind
           </p>
         </div>
         
         <div class="author-container">
           <div class="author-image">
-            
               <img src="">            
-            
           </div>
           <p>
-              Member 3
+              Rushendra Sidibomma 
           </p>
         </div>
         
         <div class="author-container">
           <div class="author-image">
-                        
               <img src="">
-            
           </div>
           <p>
-            Member 4
+            Yongchean Chhy
           </p>
         </div>
-        
       </div>
 
       <br/>
@@ -83,11 +74,9 @@
         <div class="publication-links">
           <!-- Github link -->
           <span class="link-block">
-            <a
-              href=""
+            <a href="https://github.com/chinmayarvind23/Risk-Adjusted-Hallucination-Detection"
               target="_blank"
-              class="external-link button is-normal is-rounded is-dark is-outlined"
-            >
+              class="external-link button is-normal is-rounded is-dark is-outlined">
             <span>Final Report</span>
             </a>
           </span>
@@ -111,25 +100,18 @@
           </span>              
         </div>
       </div>
-
-
     </div>
   </div>
-
-
-
-
-
-  
-  
-
 
   <div class="wrapper">
     <hr>
     
     <h2 id="abstract">Abstract</h2>
-
-<p>One or two sentences on the motivation behind the problem you are solving. One or two sentences describing the approach you took. One or two sentences on the main result you obtained.</p>
+    <p>
+      Large Language Models (LLMs) often generate fluent but incorrect responses, known as hallucinations, which pose risks in high-stakes applications. In this project, we develop a risk-adjusted hallucination detection framework that predicts the likelihood that a generated response is unsupported by evidence. 
+      Our approach combines multiple uncertainty signals, including token entropy, semantic entropy, and self-consistency, with an evidence-based groundedness signal. These features are used to train a detector that outputs a calibrated probability of hallucination.
+      We evaluate our method across two different grounding regimes (PHANTOM and WikiQA) and study whether combining uncertainty and groundedness signals improves generalization. Our results demonstrate improved reliability through calibration and selective abstention, enabling models to avoid answering when hallucination risk is high.
+    </p>
 
 <hr>
 
@@ -152,21 +134,21 @@
 <b>What did you try to do? What problem did you try to solve? Articulate your objectives using absolutely no jargon.</b>
 </p>
 <p>
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+  Large Language Models (LLMs) are capable of generating highly fluent responses, but they often produce incorrect or unsupported information, commonly referred to as hallucinations. These errors are particularly problematic in domains such as healthcare, finance, and law, where incorrect outputs can have serious consequences.
 </p>
 
 <p>
 <b>How is it done today, and what are the limits of current practice?</b>
 </p>
 <p>
-Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-<p>
+Existing approaches to hallucination detection often rely on a single signal, such as model confidence or external verification. However, hallucinations can arise in different ways depending on the availability of evidence and the structure of the task. As a result, methods that work well in one setting may fail to generalize to another.
+</p>
 
 <p>
 <b>Who cares? If you are successful, what difference will it make?</b>
 </p>
 <p>
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Improving hallucination detection enables safer deployment of LLMs by allowing systems to recognize when they are likely to be wrong. By introducing abstention, choosing not to answer when risk is high, we can trade off coverage for reliability, which is critical in real-world applications.
 </p>
 
 <hr>
@@ -176,17 +158,30 @@ Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu 
 <p>
 <b>What did you do exactly? How did you solve the problem? Why did you think it would be successful? Is anything new in your approach?</b>
 </p>
+  <p>
+    We develop a hallucination detection framework that predicts the probability that a generated response is not grounded in evidence. Our approach combines four key features:
+    <li>Token Entropy: Measures uncertainty at the token level during generation.</li>
+    <li>Self-Consistency: Measures agreement across multiple sampled responses.</li>
+    <li>Semantic Entropy: Captures uncertainty at the meaning level using clustering of responses.</li>
+    <li>Evidence Consistency: Measures how well the response is supported by provided or retrieved evidence.</li>
+  </p>
+
+
+
 
 <p>
-Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+These features are combined into a learned detector (logistic regression) that outputs a hallucination risk score. This score is then calibrated using temperature scaling to produce a probability of hallucination.
+</p>
+
+<p>
+Our key contribution is combining both internal uncertainty signals and external groundedness signals into a unified framework and evaluating its ability to generalize across different grounding regimes.
 </p>
 
 <p>
 <b>What problems did you anticipate? What problems did you encounter? Did the very first thing you tried work?</b>
 </p>
-
 <p>
-Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
+We address challenges such as dataset differences, ensuring consistent feature computation, avoiding data leakage, and maintaining reproducibility across generation and evaluation pipelines.
 </p>
 
 <hr>
@@ -196,8 +191,17 @@ Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium dolor
 <b>How did you measure success? What experiments were used? What were the results, both quantitative and qualitative? Did you succeed? Did you fail? Why?</b>
 </p>
 <p>
-Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.
+We evaluate our hallucination detector using AUROC, AUPRC, accuracy, F1 score, Expected Calibration Error (ECE), and Brier score. We also analyze risk-coverage and accuracy-coverage trade-offs under different abstention thresholds.
 </p>
+
+<p>
+Our experiments compare individual features against combined models and demonstrate that combining uncertainty and groundedness signals leads to improved detection performance and better generalization across datasets.
+</p>
+
+<p>
+We further conduct transfer experiments by training on one dataset and evaluating on another, showing how well the detector generalizes across grounding regimes.
+</p>
+
 <table>
   <thead>
     <tr>
@@ -234,12 +238,10 @@ Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed 
 
 
 <h2 id="conclusion">Conclustion and Future Work</h2>
-<p>
-
-  How easily are your results able to be reproduced by others?
-  Did your dataset or annotation affect other people's choice of research or development projects to undertake?
-  Does your work have potential harm or risk to our society? What kinds? If so, how can you address them?
-  What limitations does your model have? How can you extend your work for future research?</p>
+  <p>
+    Our results show that combining uncertainty-based and evidence-based signals improves hallucination detection performance and enables more reliable model behavior through abstention. 
+    However, challenges remain in transferring detectors across datasets due to differences in grounding regimes and calibration shifts. Future work includes improving semantic clustering methods, exploring stronger calibration techniques, and extending the framework to larger models and more diverse datasets.
+  </p>
 
 
 <hr>
