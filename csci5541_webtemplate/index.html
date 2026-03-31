@@ -77,12 +77,12 @@
             <a href="https://github.com/chinmayarvind23/Risk-Adjusted-Hallucination-Detection"
               target="_blank"
               class="external-link button is-normal is-rounded is-dark is-outlined">
-            <span>Final Report</span>
+            <span>Project Repo</span>
             </a>
           </span>
           <span class="link-block">
             <a
-              href=""
+              href="https://github.com/chinmayarvind23/Risk-Adjusted-Hallucination-Detection/tree/main/code"
               target="_blank"
               class="external-link button is-normal is-rounded is-dark is-outlined"
             >
@@ -106,25 +106,29 @@
   <div class="wrapper">
     <hr>
     
-    <h2 id="abstract">Abstract</h2>
-    <p>
+<h2 id="abstract">Abstract</h2>
+<p>
       Large Language Models (LLMs) often generate fluent but incorrect responses, known as hallucinations, which pose risks in high-stakes applications. In this project, we develop a risk-adjusted hallucination detection framework that predicts the likelihood that a generated response is unsupported by evidence. 
       Our approach combines multiple uncertainty signals, including token entropy, semantic entropy, and self-consistency, with an evidence-based groundedness signal. These features are used to train a detector that outputs a calibrated probability of hallucination.
-      We evaluate our method across two different grounding regimes (PHANTOM and WikiQA) and study whether combining uncertainty and groundedness signals improves generalization. Our results demonstrate improved reliability through calibration and selective abstention, enabling models to avoid answering when hallucination risk is high.
+      We evaluate our method across two grounding regimes: PHANTOM, where evidence is given directly in long context, and WikiQA, where evidence is retrieved from Wikipedia using the provided document title. Our current pipeline uses <code>qwen3:8b</code> for answer generation and <code>qwen3:14b</code> as an evidence-grounded judge. Early runs show that PHANTOM is much more semantically stable and more strongly grounded than WikiQA, while WikiQA exhibits substantially higher semantic uncertainty and weaker evidence alignment.
     </p>
 
 <hr>
 
-<h2 id="teaser">Teaser Figure</h2>
+<h2 id="teaser">Pipeline Overview</h2>
 
-<p>A figure that conveys the main idea behind the project or the main application being addressed. This figure is from <a href="https://arxiv.org/pdf/2210.07469">StyLEx</a>.</p>
+<p>Given question and evidence, we generate one served answer plus sampled answers, compute four features, and use a stronger judge model to label evidence support.</p>
 
 <p class="sys-img"><img src="./files/teaser.png" alt="imgname"></p>
 
 
-<h3 id="the-timeline-and-the-highlights">Any subsection</h3>
+<h3 id="the-timeline-and-the-highlights">Pipeline Summary</h3>
 
-<p>If you need to explain more about your figure</p>
+<p>
+  Inputs are question-context pairs from two regimes: PHANTOM long-context QA and WikiQA with retrieved Wikipedia evidence.
+  For each example, <code>qwen3:8b</code> generates a served answer and <code>k</code> sampled answers. We then compute token uncertainty,
+  self-consistency disagreement, semantic entropy, and evidence consistency. Finally, <code>qwen3:14b</code> judges whether the served answer is supported by the provided evidence.
+</p>
 
 <hr>
 
@@ -160,10 +164,10 @@ Improving hallucination detection enables safer deployment of LLMs by allowing s
 </p>
   <p>
     We develop a hallucination detection framework that predicts the probability that a generated response is not grounded in evidence. Our approach combines four key features:
-    <li>Token Entropy: Measures uncertainty at the token level during generation.</li>
-    <li>Self-Consistency: Measures agreement across multiple sampled responses.</li>
-    <li>Semantic Entropy: Captures uncertainty at the meaning level using clustering of responses.</li>
-    <li>Evidence Consistency: Measures how well the response is supported by provided or retrieved evidence.</li>
+    <li>Token Uncertainty: mean token negative log-likelihood from generator log probabilities.</li>
+    <li>Self-Consistency: disagreement across multiple sampled responses using sentence-embedding similarity.</li>
+    <li>Semantic Entropy: meaning-level uncertainty computed from entailment-based clustering of sampled answers.</li>
+    <li>Evidence Consistency: sentence-level NLI groundedness against the provided or retrieved evidence.</li>
   </p>
 
 
@@ -174,7 +178,7 @@ These features are combined into a learned detector (logistic regression) that o
 </p>
 
 <p>
-Our key contribution is combining both internal uncertainty signals and external groundedness signals into a unified framework and evaluating its ability to generalize across different grounding regimes.
+Our key contribution is combining internal uncertainty signals and external groundedness signals into a unified feature pipeline, then evaluating those signals across two evidence regimes for the same generator model. The current implementation uses <code>qwen3:8b</code> for generation, <code>qwen3:14b</code> for judgment, and <code>k=5</code> sampled answers in the main experimental setting.
 </p>
 
 <p>
@@ -195,37 +199,46 @@ We evaluate our hallucination detector using AUROC, AUPRC, accuracy, F1 score, E
 </p>
 
 <p>
-Our experiments compare individual features against combined models and demonstrate that combining uncertainty and groundedness signals leads to improved detection performance and better generalization across datasets.
+Our experiments compare individual features against combined models and evaluate transfer between PHANTOM and WikiQA. Before running the full detector, we validate the feature-generation pipeline with smoke-test runs and report descriptive statistics of the four core features.
 </p>
 
 <p>
-We further conduct transfer experiments by training on one dataset and evaluating on another, showing how well the detector generalizes across grounding regimes.
+Current smoke-test results already show a clear regime difference: PHANTOM answers are typically short, highly grounded, and semantically stable, while WikiQA answers show more disagreement, higher semantic entropy, and weaker evidence consistency.
 </p>
 
 <table>
   <thead>
     <tr>
-      <th style="text-align: center"><strong>Experiment</strong></th>
-      <th style="text-align: center">1</th>
-      <th style="text-align: center">2</th>
-      <th style="text-align: center">3</th>
+      <th style="text-align: center"><strong>Dataset</strong></th>
+      <th style="text-align: center"><strong>Num Examples</strong></th>
+      <th style="text-align: center"><strong>k</strong></th>
+      <th style="text-align: center"><strong>Mean Token NLL</strong></th>
+      <th style="text-align: center"><strong>Mean Self-Consistency Disagreement</strong></th>
+      <th style="text-align: center"><strong>Mean Semantic Entropy</strong></th>
+      <th style="text-align: center"><strong>Mean Groundedness</strong></th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: center"><strong>Sentence</strong></td>
-      <td style="text-align: center">Example 1</td>
-      <td style="text-align: center">Example 2</td>
-      <td style="text-align: center">Example 3</td>
+      <td style="text-align: center"><strong>PHANTOM</strong></td>
+      <td style="text-align: center">10</td>
+      <td style="text-align: center">5</td>
+      <td style="text-align: center">0.0066</td>
+      <td style="text-align: center">0.0036</td>
+      <td style="text-align: center">0.0546</td>
+      <td style="text-align: center">0.9680</td>
     </tr>
     <tr>
-      <td style="text-align: center"><strong>Errors</strong></td>
-      <td style="text-align: center">error A, error B, error C</td>
-      <td style="text-align: center">error C</td>
-      <td style="text-align: center">error B</td>
+      <td style="text-align: center"><strong>WikiQA</strong></td>
+      <td style="text-align: center">10</td>
+      <td style="text-align: center">5</td>
+      <td style="text-align: center">0.1096</td>
+      <td style="text-align: center">0.1146</td>
+      <td style="text-align: center">0.7649</td>
+      <td style="text-align: center">0.5608</td>
     </tr>
   </tbody>
-  <caption>Table 1. This is Table 1's caption</caption>
+  <caption>Table 1. Smoke-test feature summaries from 10-example runs. WikiQA shows substantially higher uncertainty and lower groundedness than PHANTOM.</caption>
 </table>
 <br>
 <div style="text-align: center;">
@@ -233,14 +246,19 @@ We further conduct transfer experiments by training on one dataset and evaluatin
 </div>
 <br><br>
 
+<p>
+The final webpage figure should replace the placeholder image above with either:
+<li>a bar chart comparing mean feature values across PHANTOM and WikiQA, or</li>
+<li>a detector result figure such as AUROC/AUPRC and risk-coverage once the larger runs finish.</li>
+</p>
+
 <hr>
 
 
 
 <h2 id="conclusion">Conclustion and Future Work</h2>
   <p>
-    Our results show that combining uncertainty-based and evidence-based signals improves hallucination detection performance and enables more reliable model behavior through abstention. 
-    However, challenges remain in transferring detectors across datasets due to differences in grounding regimes and calibration shifts. Future work includes improving semantic clustering methods, exploring stronger calibration techniques, and extending the framework to larger models and more diverse datasets.
+    The current pipeline is fully operational for both PHANTOM and WikiQA and produces judge labels together with the four feature families needed for the detector. Early results suggest that PHANTOM is an easier, more evidence-aligned regime, while WikiQA produces more uncertainty and lower groundedness. The next step is to scale these runs, train the detector, calibrate the risk score, and evaluate abstention and cross-regime transfer more systematically.
   </p>
 
 
