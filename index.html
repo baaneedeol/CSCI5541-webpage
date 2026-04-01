@@ -1,18 +1,17 @@
 <!DOCTYPE html>
-<html lang=" en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  
+<head>
+  <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title>NLP Class Project | Spring 2026 CSCI 5541 | University of Minnesota</title>
 
-  <link rel="stylesheet" href="./files/bulma.min.css" />
+  <link rel="stylesheet" href="files/bulma.min.css">
+  <link rel="stylesheet" href="files/styles.css">
 
-  <link rel="stylesheet" href="./files/styles.css">
-  <link rel="preconnect" href="https://fonts.gstatic.com/">
-  <link href="./files/css2" rel="stylesheet">
-  <link href="./files/css" rel="stylesheet">
-
-  <base href="." target="_blank"></head>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+</head>
 
 <body>
   <div>
@@ -171,13 +170,14 @@ Improving hallucination detection enables safer deployment of LLMs by allowing s
 <p>
 <b>What did you do exactly? How did you solve the problem? Why did you think it would be successful? Is anything new in your approach?</b>
 </p>
-  <p>
-    We develop a hallucination detection framework that predicts the probability that a generated response is not grounded in evidence. Our approach combines four key features:
-    <li>Token Uncertainty: mean token negative log-likelihood from generator log probabilities.</li>
-    <li>Self-Consistency: disagreement across multiple sampled responses using sentence-embedding similarity.</li>
-    <li>Semantic Entropy: meaning-level uncertainty computed from entailment-based clustering of sampled answers.</li>
-    <li>Evidence Consistency: sentence-level NLI groundedness against the provided or retrieved evidence.</li>
-  </p>
+<p>We develop a hallucination detection framework that predicts the probability that a generated response is not grounded in evidence. Our approach combines four key features:</p>
+
+<ul>
+  <li><b>Token Uncertainty:</b> mean token negative log-likelihood from generator log probabilities.</li>
+  <li><b>Self-Consistency:</b> disagreement across multiple sampled responses using sentence-embedding similarity.</li>
+  <li><b>Semantic Entropy:</b> meaning-level uncertainty computed from entailment-based clustering of sampled answers.</li>
+  <li><b>Evidence Consistency:</b> sentence-level NLI groundedness against the provided or retrieved evidence.</li>
+</ul>
 
 
 
@@ -281,7 +281,7 @@ Figure 2 visualizes the larger-run summaries shown in Table 1. The left panel co
 
 
 
-<h2 id="conclusion">Conclustion and Future Work</h2>
+<h2 id="conclusion">Conclusion and Future Work</h2>
   <p>
     The current pipeline is fully operational for both PHANTOM and WikiQA and produces judge labels together with the four feature families needed for the detector. The larger runs reinforce the same pattern seen in smoke tests: PHANTOM is the more stable and evidence-aligned regime, while WikiQA produces more uncertainty and a much higher rate of unsupported generated answers. The next step is to train the detector over these features, calibrate the risk score, and evaluate abstention and cross-regime transfer more systematically.
   </p>
