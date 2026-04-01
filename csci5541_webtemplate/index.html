@@ -119,7 +119,7 @@
 <p>
       Large Language Models (LLMs) often generate fluent but incorrect responses, known as hallucinations, which pose risks in high-stakes applications. In this project, we develop a risk-adjusted hallucination detection framework that predicts the likelihood that a generated response is unsupported by evidence. 
       Our approach combines multiple uncertainty signals, including token entropy, semantic entropy, and self-consistency, with an evidence-based groundedness signal. These features are used to train a detector that outputs a calibrated probability of hallucination.
-      We evaluate our method across two grounding regimes: PHANTOM, where evidence is given directly in long context, and WikiQA, where evidence is retrieved from Wikipedia using the provided document title. Our current pipeline uses <code>qwen3:8b</code> for answer generation and <code>qwen3:14b</code> as an evidence-grounded judge. Early runs show that PHANTOM is much more semantically stable and more strongly grounded than WikiQA, while WikiQA exhibits substantially higher semantic uncertainty and weaker evidence alignment.
+      We evaluate our method across two grounding regimes: PHANTOM, where evidence is given directly in long context, and WikiQA, where evidence is retrieved from Wikipedia using the provided document title. Our current pipeline uses <code>qwen3:8b</code> for answer generation and <code>qwen3:14b</code> as an evidence-grounded judge. Larger initial runs show that PHANTOM is more stable and more strongly grounded than WikiQA, while WikiQA exhibits substantially higher semantic uncertainty, greater sampled-answer disagreement, and a much higher unsupported rate.
     </p>
 
 <hr>
@@ -207,12 +207,24 @@ We address challenges such as dataset differences, ensuring consistent feature c
 We evaluate our hallucination detector using AUROC, AUPRC, accuracy, F1 score, Expected Calibration Error (ECE), and Brier score. We also analyze risk-coverage and accuracy-coverage trade-offs under different abstention thresholds.
 </p>
 
+  <p>
+  Our experiments compare individual features against combined models and evaluate transfer between PHANTOM and WikiQA. Before running the full detector, we validate the feature-generation pipeline with larger descriptive runs and report summary statistics of the four core features.
+  </p>
+
+  <p>
+  In the table below, lower token NLL means the generator was more confident in the tokens it produced, lower self-consistency disagreement means sampled answers agreed more with each other, lower semantic entropy means meaning-level uncertainty was lower, and higher groundedness means the generated answer was better supported by the evidence. A lower judge unsupported rate means fewer generated answers were flagged by the judge as unsupported or hallucinated.
+  </p>
+  
+  <p>
+  Our initial runs show a clear regime difference: PHANTOM answers are more stable, more confident, and more strongly grounded than WikiQA. WikiQA answers show higher disagreement, higher semantic entropy, and a much larger fraction of judge-labeled unsupported generations.
+  </p>
+
 <p>
-Our experiments compare individual features against combined models and evaluate transfer between PHANTOM and WikiQA. Before running the full detector, we validate the feature-generation pipeline with smoke-test runs and report descriptive statistics of the four core features.
+More concretely, PHANTOM has lower token uncertainty (0.0335 vs. 0.0870), lower self-consistency disagreement (0.0362 vs. 0.1199), and lower semantic entropy (0.2162 vs. 0.4435), which indicates that the generator is both more confident and more semantically stable in the long-context regime. Groundedness is also slightly higher on PHANTOM (0.6836 vs. 0.6606), and the largest gap appears in the judge labels: only 15% of PHANTOM generations were marked unsupported, compared with 50% on WikiQA.
 </p>
 
 <p>
-Current smoke-test results already show a clear regime difference: PHANTOM answers are typically short, highly grounded, and semantically stable, while WikiQA answers show more disagreement, higher semantic entropy, and weaker evidence consistency.
+Taken together, these summaries suggest that PHANTOM is the easier evidence-grounded regime for <code>qwen3:8b</code>, while WikiQA is the harder retrieval-grounded regime and induces substantially more hallucination risk. These are the cross-regime differences our detector captures before calibration, abstention, and transfer experiments.
 </p>
 
 <table>
@@ -225,29 +237,35 @@ Current smoke-test results already show a clear regime difference: PHANTOM answe
       <th style="text-align: center"><strong>Mean Self-Consistency Disagreement</strong></th>
       <th style="text-align: center"><strong>Mean Semantic Entropy</strong></th>
       <th style="text-align: center"><strong>Mean Groundedness</strong></th>
+      <th style="text-align: center"><strong>Judge Unsupported Rate</strong></th>
+      <th style="text-align: center"><strong>Elapsed Minutes</strong></th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td style="text-align: center"><strong>PHANTOM</strong></td>
-      <td style="text-align: center">10</td>
+      <td style="text-align: center">200</td>
       <td style="text-align: center">5</td>
-      <td style="text-align: center">0.0066</td>
-      <td style="text-align: center">0.0036</td>
-      <td style="text-align: center">0.0546</td>
-      <td style="text-align: center">0.9680</td>
+      <td style="text-align: center">0.0335</td>
+      <td style="text-align: center">0.0362</td>
+      <td style="text-align: center">0.2162</td>
+      <td style="text-align: center">0.6836</td>
+      <td style="text-align: center">0.15</td>
+      <td style="text-align: center">449.93</td>
     </tr>
     <tr>
       <td style="text-align: center"><strong>WikiQA</strong></td>
-      <td style="text-align: center">10</td>
+      <td style="text-align: center">100</td>
       <td style="text-align: center">5</td>
-      <td style="text-align: center">0.1096</td>
-      <td style="text-align: center">0.1146</td>
-      <td style="text-align: center">0.7649</td>
-      <td style="text-align: center">0.5608</td>
+      <td style="text-align: center">0.0870</td>
+      <td style="text-align: center">0.1199</td>
+      <td style="text-align: center">0.4435</td>
+      <td style="text-align: center">0.6606</td>
+      <td style="text-align: center">0.50</td>
+      <td style="text-align: center">437.31</td>
     </tr>
   </tbody>
-  <caption>Table 1. Smoke-test feature summaries from 10-example runs. WikiQA shows substantially higher uncertainty and lower groundedness than PHANTOM.</caption>
+  <caption>Table 1. Feature summaries from the larger local runs with k=5. WikiQA shows substantially higher uncertainty and a much higher unsupported rate than PHANTOM.</caption>
 </table>
 <br>
 <div style="text-align: center;">
@@ -256,9 +274,7 @@ Current smoke-test results already show a clear regime difference: PHANTOM answe
 <br><br>
 
 <p>
-The final webpage figure should replace the placeholder image above with either:
-<li>a bar chart comparing mean feature values across PHANTOM and WikiQA, or</li>
-<li>a detector result figure such as AUROC/AUPRC and risk-coverage once the larger runs finish.</li>
+Figure 2 visualizes the larger-run summaries shown in Table 1. The left panel compares the four mean feature values across PHANTOM and WikiQA, and the right panel shows the judge unsupported rate for generated answers.
 </p>
 
 <hr>
@@ -267,7 +283,7 @@ The final webpage figure should replace the placeholder image above with either:
 
 <h2 id="conclusion">Conclustion and Future Work</h2>
   <p>
-    The current pipeline is fully operational for both PHANTOM and WikiQA and produces judge labels together with the four feature families needed for the detector. Early results suggest that PHANTOM is an easier, more evidence-aligned regime, while WikiQA produces more uncertainty and lower groundedness. The next step is to scale these runs, train the detector, calibrate the risk score, and evaluate abstention and cross-regime transfer more systematically.
+    The current pipeline is fully operational for both PHANTOM and WikiQA and produces judge labels together with the four feature families needed for the detector. The larger runs reinforce the same pattern seen in smoke tests: PHANTOM is the more stable and evidence-aligned regime, while WikiQA produces more uncertainty and a much higher rate of unsupported generated answers. The next step is to train the detector over these features, calibrate the risk score, and evaluate abstention and cross-regime transfer more systematically.
   </p>
 
 
