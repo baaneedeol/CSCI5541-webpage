@@ -29,16 +29,15 @@
       </h4>
 
       <div class="authors-wrapper">
-        
         <div class="author-container">
-          <div class="author-image">        
-              <img src="files/baanee.jpeg">
+          <div class="author-image">
+            <img src="files/baanee.jpeg" alt="Baanee Singh">
           </div>
-          <p>        
-              Baanee Singh
+          <p>
+            Baanee Singh
           </p>
         </div>
-        
+
         <div class="author-container">
           <div class="author-image">
             <img src="files/chinmay.jpeg" alt="Chinmay Arvind">
@@ -47,19 +46,19 @@
             Chinmay Arvind
           </p>
         </div>
-        
+
         <div class="author-container">
           <div class="author-image">
-              <img src="files/rushendra.png" alt="Rushendra Sidibomma">
+            <img src="files/rushendra.png" alt="Rushendra Sidibomma">
           </div>
           <p>
-              Rushendra Sidibomma
+            Rushendra Sidibomma
           </p>
         </div>
-        
+
         <div class="author-container">
           <div class="author-image">
-              <img src="files/yongchean.png" alt="Yongchean Chhy">
+            <img src="files/yongchean.png" alt="Yongchean Chhy">
           </div>
           <p>
             Yongchean Chhy
@@ -71,12 +70,11 @@
 
       <div class="authors-wrapper">
         <div class="publication-links">
-          <!-- Github link -->
           <span class="link-block">
             <a href="https://github.com/chinmayarvind23/Risk-Adjusted-Hallucination-Detection"
               target="_blank"
               class="external-link button is-normal is-rounded is-dark is-outlined">
-            <span>Project Repo</span>
+              <span>Project Repo</span>
             </a>
           </span>
           <span class="link-block">
@@ -85,16 +83,25 @@
               target="_blank"
               class="external-link button is-normal is-rounded is-dark is-outlined"
             >
-            <span>Code</span>
+              <span>Code</span>
             </a>
-          </span>      
+          </span>
+          <span class="link-block">
+            <a
+              href="https://github.com/chinmayarvind23/Risk-Adjusted-Hallucination-Detection/blob/main/FULL_RESULTS_SUMMARY.md"
+              target="_blank"
+              class="external-link button is-normal is-rounded is-dark is-outlined"
+            >
+              <span>Full Results Summary</span>
+            </a>
+          </span>
           <span class="link-block">
             <a
               href="https://ollama.com/library/qwen3:8b"
               target="_blank"
               class="external-link button is-normal is-rounded is-dark is-outlined"
             >
-            <span>Generator Model Weights</span>
+              <span>Generator Model Weights</span>
             </a>
           </span>
           <span class="link-block">
@@ -103,9 +110,9 @@
               target="_blank"
               class="external-link button is-normal is-rounded is-dark is-outlined"
             >
-            <span>Judge Model Weights</span>
+              <span>Judge Model Weights</span>
             </a>
-          </span>              
+          </span>
         </div>
       </div>
     </div>
@@ -113,185 +120,341 @@
 
   <div class="wrapper">
     <hr>
-    
-<h2 id="abstract">Abstract</h2>
-<p>
-      Large Language Models (LLMs) often generate fluent but incorrect responses, known as hallucinations, which pose risks in high-stakes applications. In this project, we develop a risk-adjusted hallucination detection framework that predicts the likelihood that a generated response is unsupported by evidence. 
-      Our approach combines multiple uncertainty signals, including token entropy, semantic entropy, and self-consistency, with an evidence-based groundedness signal. These features are used to train a detector that outputs a calibrated probability of hallucination.
-      We evaluate our method across two grounding regimes: PHANTOM, where evidence is given directly in long context, and WikiQA, where evidence is retrieved from Wikipedia using the provided document title. Our current pipeline uses <code>qwen3:8b</code> for answer generation and <code>qwen3:14b</code> as an evidence-grounded judge. Larger initial runs show that PHANTOM is more stable and more strongly grounded than WikiQA, while WikiQA exhibits substantially higher semantic uncertainty, greater sampled-answer disagreement, and a much higher unsupported rate.
+
+    <h2 id="abstract">Abstract</h2>
+    <p>
+      Large Language Models can produce fluent but unsupported answers, which is dangerous in settings where users need evidence-backed responses. We build a risk-adjusted hallucination detection pipeline that predicts whether a generated answer is unsupported by the provided evidence, calibrates that risk score, and abstains when risk is high. The detector combines four signals: token uncertainty, self-consistency disagreement, semantic entropy, and groundedness. We evaluate the full pipeline on two evidence regimes, PHANTOM and WikiQA, and we also test frozen transfer in both directions. The main result is that the standalone detector works best on PHANTOM, calibration and abstention are most useful on PHANTOM, and transfer fails in both directions because several uncertainty features change meaning across datasets while groundedness remains the most stable signal.
     </p>
 
-<hr>
+    <hr>
 
-<h2 id="teaser">Pipeline Overview</h2>
+    <h2 id="teaser">Pipeline Overview</h2>
 
-<p>Given question and evidence, we generate one served answer plus sampled answers, compute four features, and use a stronger judge model to label evidence support.</p>
+    <p>
+      Given a question and evidence, we generate one served answer plus sampled answers, compute four features, train a lightweight detector, calibrate its risk score, and abstain on high-risk examples.
+    </p>
 
-<p class="sys-img"><img src="./files/pipeline.png" alt="imgname"></p>
+    <p class="sys-img"><img src="./files/pipeline.png" alt="Pipeline overview"></p>
 
+    <h3 id="pipeline-summary">Pipeline Summary</h3>
 
-<h3 id="the-timeline-and-the-highlights">Pipeline Summary</h3>
+    <p>
+      Inputs are question-context pairs from two regimes: PHANTOM long-context QA and WikiQA with retrieved Wikipedia evidence. For each example, <code>qwen3:8b</code> generates a served answer and <code>k=5</code> sampled answers. We then compute token uncertainty, self-consistency disagreement, semantic entropy, and evidence consistency. Labels are produced by a stronger judge model, and groundedness is computed separately with NLI so the feature pipeline is not the same mechanism as the labeler. We train a logistic regression detector on the feature table, compare calibration methods, freeze the final detector bundle, and evaluate abstention and transfer.
+    </p>
 
-<p>
-  Inputs are question-context pairs from two regimes: PHANTOM long-context QA and WikiQA with retrieved Wikipedia evidence.
-  For each example, <code>qwen3:8b</code> generates a served answer and <code>k</code> sampled answers. We then compute token uncertainty,
-  self-consistency disagreement, semantic entropy, and evidence consistency. Finally, <code>qwen3:14b</code> judges whether the served answer is supported by the provided evidence.
-</p>
+    <hr>
 
-<hr>
+    <h2 id="introduction">Introduction / Background / Motivation</h2>
 
-<h2 id="introduction">Introduction / Background / Motivation</h2>
+    <p>
+      <b>What did you try to do? What problem did you try to solve?</b>
+    </p>
+    <p>
+      We wanted to detect when an answer is unsupported by the evidence provided to the model, then use that score to avoid answering the riskiest cases. The project is about reliability, not just raw answer generation quality.
+    </p>
 
-<p>
-<b>What did you try to do? What problem did you try to solve? Articulate your objectives using absolutely no jargon.</b>
-</p>
-<p>
-  Large Language Models (LLMs) are capable of generating highly fluent responses, but they often produce incorrect or unsupported information, commonly referred to as hallucinations. These errors are particularly problematic in domains such as healthcare, finance, and law, where incorrect outputs can have serious consequences.
-</p>
+    <p>
+      <b>How is it done today, and what are the limits of current practice?</b>
+    </p>
+    <p>
+      Many hallucination detectors rely on one signal only, such as token confidence or external checking. That is often not enough. Some wrong answers are still low-uncertainty, and some uncertainty signals behave differently depending on the evidence regime. This makes single-signal methods brittle and makes transfer across datasets difficult.
+    </p>
 
-<p>
-<b>How is it done today, and what are the limits of current practice?</b>
-</p>
-<p>
-Existing approaches to hallucination detection often rely on a single signal, such as model confidence or external verification. However, hallucinations can arise in different ways depending on the availability of evidence and the structure of the task. As a result, methods that work well in one setting may fail to generalize to another.
-</p>
+    <p>
+      <b>Who cares? If you are successful, what difference will it make?</b>
+    </p>
+    <p>
+      A useful risk score can make LLM systems safer by showing when they should answer and when they should abstain. This matters in domains where unsupported answers can cause harm or erode trust.
+    </p>
 
-<p>
-<b>Who cares? If you are successful, what difference will it make?</b>
-</p>
-<p>
-Improving hallucination detection enables safer deployment of LLMs by allowing systems to recognize when they are likely to be wrong. By introducing abstention, choosing not to answer when risk is high, we can trade off coverage for reliability, which is critical in real-world applications.
-</p>
+    <hr>
 
-<hr>
+    <h2 id="approach">Approach</h2>
 
-<h2 id="approach">Approach</h2>
+    <p>
+      <b>What did you do exactly? How did you solve the problem? Why did you think it would be successful?</b>
+    </p>
+    <p>
+      We built a four-signal hallucination detector over a flat feature table:
+    </p>
 
-<p>
-<b>What did you do exactly? How did you solve the problem? Why did you think it would be successful? Is anything new in your approach?</b>
-</p>
-<p>We develop a hallucination detection framework that predicts the probability that a generated response is not grounded in evidence. Our approach combines four key features:</p>
+    <ul>
+      <li><b>Token uncertainty:</b> mean token negative log-likelihood from generation log probabilities.</li>
+      <li><b>Self-consistency disagreement:</b> disagreement across sampled responses using sentence-embedding similarity.</li>
+      <li><b>Semantic entropy:</b> meaning-level uncertainty computed from entailment-based clustering of sampled answers.</li>
+      <li><b>Evidence consistency:</b> sentence-level groundedness against the provided or retrieved evidence.</li>
+    </ul>
 
-<ul>
-  <li><b>Token Uncertainty:</b> mean token negative log-likelihood from generator log probabilities.</li>
-  <li><b>Self-Consistency:</b> disagreement across multiple sampled responses using sentence-embedding similarity.</li>
-  <li><b>Semantic Entropy:</b> meaning-level uncertainty computed from entailment-based clustering of sampled answers.</li>
-  <li><b>Evidence Consistency:</b> sentence-level NLI groundedness against the provided or retrieved evidence.</li>
-</ul>
+    <p>
+      These features are combined by a logistic regression detector that predicts unsupportedness. We then compare calibration methods on validation, choose the best final calibrator for each dataset, freeze a risk threshold on validation, and evaluate abstention on test.
+    </p>
 
+    <p>
+      The final calibration choice is dataset-specific:
+    </p>
 
+    <ul>
+      <li><b>PHANTOM:</b> Platt scaling</li>
+      <li><b>WikiQA:</b> isotonic regression</li>
+    </ul>
 
+    <p>
+      <b>What problems did you anticipate? What problems did you encounter?</b>
+    </p>
+    <p>
+      We expected distribution shift across evidence regimes. That is exactly what we found. The full standalone pipelines worked, but transfer in both directions was poor. The main issue was not just threshold mismatch. Several uncertainty features changed direction across datasets, which made the frozen source-domain detector unreliable on the target domain.
+    </p>
 
-<p>
-These features are combined into a learned detector (logistic regression) that outputs a hallucination risk score. This score is then calibrated using temperature scaling to produce a probability of hallucination.
-</p>
+    <hr>
 
-<p>
-Our key contribution is combining internal uncertainty signals and external groundedness signals into a unified feature pipeline, then evaluating those signals across two evidence regimes for the same generator model. The current implementation uses <code>qwen3:8b</code> for generation, <code>qwen3:14b</code> for judgment, and <code>k=5</code> sampled answers in the main experimental setting.
-</p>
+    <h2 id="results">Results</h2>
 
-<p>
-<b>What problems did you anticipate? What problems did you encounter? Did the very first thing you tried work?</b>
-</p>
-<p>
-We address challenges such as dataset differences, ensuring consistent feature computation, avoiding data leakage, and maintaining reproducibility across generation and evaluation pipelines.
-</p>
+    <p>
+      <b>How did you measure success? What experiments were used?</b>
+    </p>
+    <p>
+      We report AUROC, AUPRC, accuracy, precision, recall, and F1 for the standalone and transfer detectors. For calibration we report Expected Calibration Error and Brier score. For abstention we report coverage, abstention rate, selective risk, and selective accuracy, together with risk-coverage and accuracy-coverage curves.
+    </p>
 
-<hr>
-    
-<h2 id="results">Results</h2>
-<p>
-<b>How did you measure success? What experiments were used? What were the results, both quantitative and qualitative? Did you succeed? Did you fail? Why?</b>
-</p>
-<p>
-We evaluate our hallucination detector using AUROC, AUPRC, accuracy, F1 score, Expected Calibration Error (ECE), and Brier score. We also analyze risk-coverage and accuracy-coverage trade-offs under different abstention thresholds.
-</p>
+    <h3 id="standalone-results">Standalone Detector Results</h3>
 
-  <p>
-  Our experiments compare individual features against combined models and evaluate transfer between PHANTOM and WikiQA. Before running the full detector, we validate the feature-generation pipeline with larger descriptive runs and report summary statistics of the four core features.
-  </p>
+    <p>
+      Table 1 summarizes the final standalone results. AUROC, AUPRC, accuracy, precision, recall, and F1 come from the tuned detector reports. ECE, Brier, coverage, and selective accuracy come from the final calibrated abstention runs. The PHANTOM detector is the strongest success case. WikiQA still supports the full pipeline, but the detector is weaker, the learned weights are less intuitive, and the abstention gains are much smaller.
+    </p>
 
-  <p>
-  In the table below, lower token NLL means the generator was more confident in the tokens it produced, lower self-consistency disagreement means sampled answers agreed more with each other, lower semantic entropy means meaning-level uncertainty was lower, and higher groundedness means the generated answer was better supported by the evidence. A lower judge unsupported rate means fewer generated answers were flagged by the judge as unsupported or hallucinated.
-  </p>
-  
-  <p>
-  Our initial runs show a clear regime difference: PHANTOM answers are more stable, more confident, and more strongly grounded than WikiQA. WikiQA answers show higher disagreement, higher semantic entropy, and a much larger fraction of judge-labeled unsupported generations.
-  </p>
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th style="text-align: center"><strong>Dataset</strong></th>
+          <th style="text-align: center"><strong>Final Calibrator</strong></th>
+          <th style="text-align: center"><strong>AUROC</strong></th>
+          <th style="text-align: center"><strong>AUPRC</strong></th>
+          <th style="text-align: center"><strong>Accuracy</strong></th>
+          <th style="text-align: center"><strong>Precision</strong></th>
+          <th style="text-align: center"><strong>Recall</strong></th>
+          <th style="text-align: center"><strong>F1</strong></th>
+          <th style="text-align: center"><strong>ECE</strong></th>
+          <th style="text-align: center"><strong>Brier</strong></th>
+          <th style="text-align: center"><strong>Coverage at Frozen Point</strong></th>
+          <th style="text-align: center"><strong>Selective Accuracy</strong></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align: center"><strong>PHANTOM</strong></td>
+          <td style="text-align: center">Platt</td>
+          <td style="text-align: center">0.7730</td>
+          <td style="text-align: center">0.6451</td>
+          <td style="text-align: center">0.7591</td>
+          <td style="text-align: center">0.6095</td>
+          <td style="text-align: center">0.6667</td>
+          <td style="text-align: center">0.6368</td>
+          <td style="text-align: center">0.0734</td>
+          <td style="text-align: center">0.1652</td>
+          <td style="text-align: center">0.8185</td>
+          <td style="text-align: center">0.7863</td>
+        </tr>
+        <tr>
+          <td style="text-align: center"><strong>WikiQA</strong></td>
+          <td style="text-align: center">Isotonic</td>
+          <td style="text-align: center">0.6927</td>
+          <td style="text-align: center">0.3434</td>
+          <td style="text-align: center">0.6837</td>
+          <td style="text-align: center">0.4096</td>
+          <td style="text-align: center">0.7234</td>
+          <td style="text-align: center">0.5231</td>
+          <td style="text-align: center">0.0725</td>
+          <td style="text-align: center">0.1656</td>
+          <td style="text-align: center">0.9643</td>
+          <td style="text-align: center">0.7566</td>
+        </tr>
+      </tbody>
+      <caption>Table 1. Final standalone results for PHANTOM and WikiQA. PHANTOM is the strongest in-domain result. WikiQA still supports the pipeline, but the detector is weaker and abstention helps less.</caption>
+    </table>
 
-<p>
-More concretely, PHANTOM has lower token uncertainty (0.0335 vs. 0.0870), lower self-consistency disagreement (0.0362 vs. 0.1199), and lower semantic entropy (0.2162 vs. 0.4435), which indicates that the generator is both more confident and more semantically stable in the long-context regime. Groundedness is also slightly higher on PHANTOM (0.6836 vs. 0.6606), and the largest gap appears in the judge labels: only 15% of PHANTOM generations were marked unsupported, compared with 50% on WikiQA.
-</p>
+    <p>
+      The strongest single positive result is PHANTOM. The full four-feature detector beats simpler baselines overall, the learned coefficients make sense, and abstaining on the riskiest cases improves the quality of retained answers from about 0.6832 at full coverage to about 0.7863 at the frozen operating point.
+    </p>
 
-<p>
-Taken together, these summaries suggest that PHANTOM is the easier evidence-grounded regime for <code>qwen3:8b</code>, while WikiQA is the harder retrieval-grounded regime and induces substantially more hallucination risk. These are the cross-regime differences our detector captures before calibration, abstention, and transfer experiments.
-</p>
+    <p class="sys-img"><img src="./files/phantom_4000_baseline_metric_bars.png" alt="PHANTOM baseline comparison"></p>
 
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>Dataset</strong></th>
-      <th style="text-align: center"><strong>Num Examples</strong></th>
-      <th style="text-align: center"><strong>k</strong></th>
-      <th style="text-align: center"><strong>Mean Token NLL</strong></th>
-      <th style="text-align: center"><strong>Mean Self-Consistency Disagreement</strong></th>
-      <th style="text-align: center"><strong>Mean Semantic Entropy</strong></th>
-      <th style="text-align: center"><strong>Mean Groundedness</strong></th>
-      <th style="text-align: center"><strong>Judge Unsupported Rate</strong></th>
-      <th style="text-align: center"><strong>Elapsed Minutes</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center"><strong>PHANTOM</strong></td>
-      <td style="text-align: center">200</td>
-      <td style="text-align: center">5</td>
-      <td style="text-align: center">0.0335</td>
-      <td style="text-align: center">0.0362</td>
-      <td style="text-align: center">0.2162</td>
-      <td style="text-align: center">0.6836</td>
-      <td style="text-align: center">0.15</td>
-      <td style="text-align: center">449.93</td>
-    </tr>
-    <tr>
-      <td style="text-align: center"><strong>WikiQA</strong></td>
-      <td style="text-align: center">100</td>
-      <td style="text-align: center">5</td>
-      <td style="text-align: center">0.0870</td>
-      <td style="text-align: center">0.1199</td>
-      <td style="text-align: center">0.4435</td>
-      <td style="text-align: center">0.6606</td>
-      <td style="text-align: center">0.50</td>
-      <td style="text-align: center">437.31</td>
-    </tr>
-  </tbody>
-  <caption>Table 1. Feature summaries from the larger local runs with k=5. WikiQA shows substantially higher uncertainty and a much higher unsupported rate than PHANTOM.</caption>
-</table>
-<br>
-<div style="text-align: center;">
-<img style="height: 300px;" alt="" src="./files/results.png">
-</div>
-<br><br>
+    <p>
+      Figure 1 shows the PHANTOM baseline comparison. The full detector is strongest overall, and self-consistency disagreement is the strongest single feature. This supports the main in-domain claim that combining uncertainty and groundedness is more useful than relying on any one signal by itself.
+    </p>
 
-<p>
-Figure 2 visualizes the larger-run summaries shown in Table 1. The left panel compares the four mean feature values across PHANTOM and WikiQA, and the right panel shows the judge unsupported rate for generated answers.
-</p>
+    <p class="sys-img result-figure"><img src="./files/phantom_4000_tuned_logreg_coefficients.png" alt="PHANTOM learned coefficients"></p>
 
-<hr>
+    <p>
+      Figure 2 shows the learned PHANTOM coefficients. The signs are coherent: token uncertainty, self-consistency disagreement, and semantic entropy increase risk, while groundedness lowers risk. Self-consistency disagreement is the strongest warning signal on PHANTOM.
+    </p>
 
+    <p class="sys-img compact-figure"><img src="./files/phantom_4000_risk_coverage_curve.png" alt="PHANTOM risk coverage curve"></p>
 
+    <p>
+      Figure 3 shows the PHANTOM risk-coverage curve. As coverage decreases, selective risk also decreases. In simple terms, when the detector rejects the riskiest PHANTOM cases, the remaining answered set contains a lower fraction of unsupported responses.
+    </p>
 
-<h2 id="conclusion">Conclusion and Future Work</h2>
-  <p>
-    The current pipeline is fully operational for both PHANTOM and WikiQA and produces judge labels together with the four feature families needed for the detector. The larger runs reinforce the same pattern seen in smoke tests: PHANTOM is the more stable and evidence-aligned regime, while WikiQA produces more uncertainty and a much higher rate of unsupported generated answers. The next step is to train the detector over these features, calibrate the risk score, and evaluate abstention and cross-regime transfer more systematically.
-  </p>
+    <p class="sys-img compact-figure"><img src="./files/phantom_4000_accuracy_coverage_curve.png" alt="PHANTOM accuracy coverage curve"></p>
 
+    <p>
+      Figure 4 shows the PHANTOM accuracy-coverage curve. As the system abstains on more high-risk cases, the accuracy of the retained answers rises. This is the clearest abstention result in the project.
+    </p>
 
-<hr>
+    <p>
+      WikiQA is more mixed. The full pipeline still runs end to end, but the feature story is less clean, and the best final calibrator is different. On WikiQA, isotonic regression performs better than Platt scaling for the final calibration metrics.
+    </p>
 
+    <p class="sys-img result-figure"><img src="./files/wikiqa_1300_baseline_metric_bars.png" alt="WikiQA baseline comparison"></p>
 
+    <p>
+      Figure 5 shows the WikiQA baseline comparison. Token uncertainty is the strongest single feature here, and the combined model does not show the same clean advantage seen on PHANTOM. That is one sign that WikiQA is the harder regime.
+    </p>
+
+    <p class="sys-img result-figure"><img src="./files/wikiqa_1300_tuned_logreg_coefficients.png" alt="WikiQA learned coefficients"></p>
+
+    <p>
+      Figure 6 shows the WikiQA learned coefficients. Groundedness still lowers risk, but the uncertainty features are less stable than on PHANTOM. This is one reason the WikiQA result is weaker and more mixed.
+    </p>
+
+    <p class="sys-img compact-figure"><img src="./files/wikiqa_1300_risk_coverage_curve.png" alt="WikiQA risk coverage curve"></p>
+
+    <p>
+      Figure 7 shows the WikiQA risk-coverage curve. The curve still trends in the right direction, but the change is smaller than on PHANTOM. This matches the weaker abstention gains on WikiQA.
+    </p>
+
+    <p class="sys-img compact-figure"><img src="./files/wikiqa_1300_reliability_comparison_test.png" alt="WikiQA calibration comparison"></p>
+
+    <p>
+      Figure 8 shows the WikiQA calibration comparison. This figure matters because it explains why the final calibrator differs by dataset. PHANTOM uses Platt scaling, but WikiQA uses isotonic regression.
+    </p>
+
+    <h3 id="transfer-results">Cross-Regime Transfer Results</h3>
+
+    <p>
+      We ran frozen transfer in both directions. Transfer is the main negative result of the project, and it is important because it shows the limits of the method under dataset shift.
+    </p>
+
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th style="text-align: center"><strong>Transfer Direction</strong></th>
+          <th style="text-align: center"><strong>AUROC</strong></th>
+          <th style="text-align: center"><strong>AUPRC</strong></th>
+          <th style="text-align: center"><strong>Accuracy</strong></th>
+          <th style="text-align: center"><strong>Precision</strong></th>
+          <th style="text-align: center"><strong>Recall</strong></th>
+          <th style="text-align: center"><strong>F1</strong></th>
+          <th style="text-align: center"><strong>ECE</strong></th>
+          <th style="text-align: center"><strong>Brier</strong></th>
+          <th style="text-align: center"><strong>Coverage at Frozen Point</strong></th>
+          <th style="text-align: center"><strong>Selective Accuracy</strong></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align: center"><strong>PHANTOM → WikiQA</strong></td>
+          <td style="text-align: center">0.3996</td>
+          <td style="text-align: center">0.2020</td>
+          <td style="text-align: center">0.7554</td>
+          <td style="text-align: center">0.2736</td>
+          <td style="text-align: center">0.1074</td>
+          <td style="text-align: center">0.1543</td>
+          <td style="text-align: center">0.1561</td>
+          <td style="text-align: center">0.1985</td>
+          <td style="text-align: center">0.9238</td>
+          <td style="text-align: center">0.7960</td>
+        </tr>
+        <tr>
+          <td style="text-align: center"><strong>WikiQA → PHANTOM</strong></td>
+          <td style="text-align: center">0.4294</td>
+          <td style="text-align: center">0.2943</td>
+          <td style="text-align: center">0.7049</td>
+          <td style="text-align: center">0.6000</td>
+          <td style="text-align: center">0.0399</td>
+          <td style="text-align: center">0.0748</td>
+          <td style="text-align: center">0.1659</td>
+          <td style="text-align: center">0.2495</td>
+          <td style="text-align: center">0.8510</td>
+          <td style="text-align: center">0.7081</td>
+        </tr>
+      </tbody>
+      <caption>Table 2. Frozen transfer results in both directions. Both directions are much worse than the standalone runs, which shows that the learned detector and calibration rules do not carry over cleanly across evidence regimes.</caption>
+    </table>
+
+    <p class="sys-img compact-figure"><img src="./files/phantom_to_wikiqa_reliability_diagram.png" alt="PHANTOM to WikiQA reliability diagram"></p>
+
+    <p>
+      Figure 9 shows PHANTOM to WikiQA transfer. The reliability diagram is worse than the in-domain diagrams. This means the source-calibrated score is no longer behaving like a useful risk probability on the target domain.
+    </p>
+
+    <p class="sys-img compact-figure"><img src="./files/wikiqa_to_phantom_reliability_diagram.png" alt="WikiQA to PHANTOM reliability diagram"></p>
+
+    <p>
+      Figure 10 shows WikiQA to PHANTOM transfer. The same pattern appears in the reverse direction. This means the transfer problem is not limited to one source dataset. Both directions break.
+    </p>
+
+    <h3 id="deeper-analysis">Deeper Analysis of Why Transfer Fails</h3>
+
+    <p>
+      The strongest research-depth result in the repo is not only that transfer is poor. It is that we now have evidence for <b>why</b> transfer is poor.
+    </p>
+
+    <p>
+      First, the uncertainty features change meaning across datasets. Using the deeper diagnostics in the main repo, unsupported minus supported feature deltas on PHANTOM are:
+    </p>
+
+    <ul>
+      <li><b>mean token NLL:</b> +0.0868</li>
+      <li><b>self-consistency disagreement:</b> +0.1335</li>
+      <li><b>semantic entropy:</b> +0.2661</li>
+      <li><b>groundedness:</b> -0.1118</li>
+    </ul>
+
+    <p>
+      On WikiQA, the same deltas are:
+    </p>
+
+    <ul>
+      <li><b>mean token NLL:</b> -0.0187</li>
+      <li><b>self-consistency disagreement:</b> -0.0041</li>
+      <li><b>semantic entropy:</b> -0.1018</li>
+      <li><b>groundedness:</b> -0.0714</li>
+    </ul>
+
+    <p>
+      This means three uncertainty signals flip direction across datasets, while groundedness keeps the same direction. That is why groundedness is the most stable feature in the project.
+    </p>
+
+    <p>
+      Second, the learned detector weights also mismatch. The PHANTOM detector puts positive weight on token uncertainty, self-consistency disagreement, and semantic entropy, with a negative weight on groundedness. The WikiQA detector keeps groundedness negative and self-consistency mildly positive, but token uncertainty and semantic entropy flip sign. So the detector does not just need a different threshold on the new dataset. It often needs different feature directions.
+    </p>
+
+    <p>
+      Third, ranking already fails before thresholding. In transfer, raw AUROC falls below 0.45 in both directions. Calibration then gets worse on top of that. In both transfer directions, the calibrated ECE and Brier score are worse than the raw transferred values. So the failure is not just bad threshold selection. Ranking breaks first, then calibration also breaks.
+    </p>
+
+    <p>
+      Finally, many unsupported target examples still pass below the frozen source threshold. In the deeper diagnostics, about 90.4% of unsupported WikiQA target cases remain below the frozen PHANTOM threshold, and about 83.1% of unsupported PHANTOM target cases remain below the frozen WikiQA threshold. This is a concrete transfer-time version of the confident wrong problem.
+    </p>
+
+    <h3 id="main-takeaways">Main Takeaways</h3>
+
+    <ul>
+      <li><b>PHANTOM is the strongest positive result.</b> The detector is coherent, calibration is useful, and abstention improves the quality of kept answers.</li>
+      <li><b>WikiQA still supports the pipeline, but it behaves differently.</b> The detector is weaker, the coefficient story is less clean, and isotonic works better than Platt.</li>
+      <li><b>Transfer in both directions is poor.</b> This is part of the final experimental outcome, not a missing result.</li>
+      <li><b>Groundedness is the most stable feature family.</b> It keeps the same sign across both datasets.</li>
+      <li><b>Uncertainty features are more regime-dependent.</b> Their label relationship and learned coefficients shift across datasets.</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="conclusion">Conclusion and Future Work</h2>
+    <p>
+      The project is now complete as a full research pipeline. We built the feature extraction system, trained standalone detectors for PHANTOM and WikiQA, compared calibration methods, froze abstention rules, and evaluated transfer in both directions. The final story is clear: combining uncertainty and groundedness works in-domain, especially on PHANTOM, but transfer across evidence regimes fails because the meaning of several uncertainty features changes across datasets. The most promising future work is lightweight domain adaptation, stronger qualitative failure analysis, and feature designs that preserve signal meaning across regimes more reliably.
+    </p>
+
+    <hr>
   </div>
-  
-
-
-</body></html>
+</body>
+</html>
