@@ -9,12 +9,12 @@ The site is a single-page static HTML page backed by local CSS and image assets.
 ## Files
 
 - [index.html](C:/Users/chinm/Documents/coursework/5541/project/CSCI5541-webpage/index.html): main webpage
-- [files/styles.css](C:/Users/chinm/Documents/coursework/5541/project/CSCI5541-webpage/files/styles.css): local stylesheet
+- [files/styles.css](C:/Users/chinm/Documents/coursework/5541/project/CSCI5541-webpage/files/styles.css): stylesheet
 - [files/](C:/Users/chinm/Documents/coursework/5541/project/CSCI5541-webpage/files): author photos and result figures
 
 ## Content source
 
-The site content reflects the final project state from the main experiment repository:
+The site content reflects the final project state from the main project repository for Team AttentionForge:
 
 - PHANTOM standalone results
 - WikiQA standalone results
@@ -36,5 +36,4 @@ To update the page:
 
 ## Notes
 
-- The page is static and does not require a build step.
-- Open `index.html` directly in a browser for local preview.
+- Can open the link on github deployments.
