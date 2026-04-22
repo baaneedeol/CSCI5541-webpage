@@ -6,6 +6,10 @@ This repository contains the static project website for:
 
 The site is a single-page static HTML page backed by local CSS and image assets.
 
+Shared data folder:
+
+- https://drive.google.com/drive/folders/1aHTuwsl0TuDfcwWspzaYjyUueDXrDSw5?usp=sharing
+
 ## Files
 
 - [index.html](C:/Users/chinm/Documents/coursework/5541/project/CSCI5541-webpage/index.html): main webpage
