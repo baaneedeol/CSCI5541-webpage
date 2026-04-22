@@ -159,7 +159,7 @@
       <b>What did you try to do? What problem did you try to solve?</b>
     </p>
     <p>
-      We wanted to detect when an answer is unsupported by the evidence provided to the model, then use that score to avoid answering the riskiest cases. The project is about reliability, not just raw answer generation quality.
+      We wanted to detect when an answer is unsupported by the evidence provided to the model, then use that score to avoid answering the riskiest cases. The project is about reliability, and raw answer generation quality.
     </p>
 
     <p>
@@ -195,7 +195,7 @@
     </ul>
 
     <p>
-      These features are combined by a logistic regression detector that predicts unsupportedness. We then compare calibration methods on validation, choose the best final calibrator for each dataset, freeze a risk threshold on validation, and evaluate abstention on test.
+      These features are combined by a logistic regression detector that predicts evidence unsupportedness. We then compare calibration methods on validation, choose the best final calibrator for each dataset, freeze a risk threshold on validation, and evaluate abstention on a test set.
     </p>
 
     <p>
@@ -306,7 +306,7 @@
     <p class="sys-img compact-figure"><img src="./files/phantom_4000_accuracy_coverage_curve.png" alt="PHANTOM accuracy coverage curve"></p>
 
     <p>
-      Figure 4 shows the PHANTOM accuracy-coverage curve. As the system abstains on more high-risk cases, the accuracy of the retained answers rises. This is the clearest abstention result in the project.
+      Figure 4 shows the PHANTOM accuracy-coverage curve. As the system abstains on more high-risk cases, the accuracy of the retained answers rises.
     </p>
 
     <p>
@@ -340,7 +340,7 @@
     <h3 id="transfer-results">Cross-Regime Transfer Results</h3>
 
     <p>
-      We ran frozen transfer in both directions. Transfer is the main negative result of the project, and it is important because it shows the limits of the method under dataset shift.
+      We ran frozen transfer in both directions. Transfer is the main negative result, and it is important because it shows the limits of the method under dataset shift.
     </p>
 
     <table class="results-table">
@@ -399,17 +399,17 @@
     <p class="sys-img compact-figure"><img src="./files/wikiqa_to_phantom_reliability_diagram.png" alt="WikiQA to PHANTOM reliability diagram"></p>
 
     <p>
-      Figure 10 shows WikiQA to PHANTOM transfer. The same pattern appears in the reverse direction. This means the transfer problem is not limited to one source dataset. Both directions break.
+      Figure 10 shows WikiQA to PHANTOM transfer. The same pattern appears in the reverse direction. This means the transfer problem is not limited to one source dataset and both directions break.
     </p>
 
     <h3 id="deeper-analysis">Deeper Analysis of Why Transfer Fails</h3>
 
     <p>
-      The strongest research-depth result in the repo is not only that transfer is poor. It is that we now have evidence for <b>why</b> transfer is poor.
+      The strongest result is not only that transfer is poor. It is that we now have evidence for <b>why</b> transfer is poor.
     </p>
 
     <p>
-      First, the uncertainty features change meaning across datasets. Using the deeper diagnostics in the main repo, unsupported minus supported feature deltas on PHANTOM are:
+      First, the uncertainty features change meaning across datasets. Unsupported minus supported feature deltas on PHANTOM are:
     </p>
 
     <ul>
@@ -431,7 +431,7 @@
     </ul>
 
     <p>
-      This means three uncertainty signals flip direction across datasets, while groundedness keeps the same direction. That is why groundedness is the most stable feature in the project.
+      This means three uncertainty signals flip direction across datasets, while groundedness keeps the same direction. That is why groundedness is the most stable feature.
     </p>
 
     <p>
@@ -443,15 +443,19 @@
     </p>
 
     <p>
-      Finally, many unsupported target examples still pass below the frozen source threshold. In the deeper diagnostics, about 90.4% of unsupported WikiQA target cases remain below the frozen PHANTOM threshold, and about 83.1% of unsupported PHANTOM target cases remain below the frozen WikiQA threshold. This is a concrete transfer-time version of the confident wrong problem.
+      This also answers an important question. The transfer errors come from both the hallucination detector and calibration shift. The detector issue appears first, because the raw transferred scores already rank target examples poorly. Calibration shift then adds a second problem, because source-side calibration does not stay well aligned on the target dataset.
+    </p>
+
+    <p>
+      Finally, many unsupported target examples still pass below the frozen source threshold. In the deeper diagnostics, about 90.4% of unsupported WikiQA target cases remain below the frozen PHANTOM threshold, and about 83.1% of unsupported PHANTOM target cases remain below the frozen WikiQA threshold. This is a concrete transfer-time version of the confidently wrong problem.
     </p>
 
     <h3 id="main-takeaways">Main Takeaways</h3>
 
     <ul>
       <li><b>PHANTOM is the strongest positive result.</b> The detector is coherent, calibration is useful, and abstention improves the quality of kept answers.</li>
-      <li><b>WikiQA still supports the pipeline, but it behaves differently.</b> The detector is weaker, the coefficient story is less clean, and isotonic works better than Platt.</li>
-      <li><b>Transfer in both directions is poor.</b> This is part of the final experimental outcome, not a missing result.</li>
+      <li><b>WikiQA still supports the pipeline, but it behaves differently.</b> The detector is weaker, the coefficient stories is are less straightforward, and isotonic regressionworks better than Platt scaling.</li>
+      <li><b>Transfer in both directions is poor.</b> PHANTOM -> WikiQA and WikiQA -> PHANTOM.</li>
       <li><b>Groundedness is the most stable feature family.</b> It keeps the same sign across both datasets.</li>
       <li><b>Uncertainty features are more regime-dependent.</b> Their label relationship and learned coefficients shift across datasets.</li>
     </ul>
@@ -460,7 +464,7 @@
 
     <h2 id="conclusion">Conclusion and Future Work</h2>
     <p>
-      The project is now complete as a full research pipeline. We built the feature extraction system, trained standalone detectors for PHANTOM and WikiQA, compared calibration methods, froze abstention rules, and evaluated transfer in both directions. The final story is clear: combining uncertainty and groundedness works in-domain, especially on PHANTOM, but transfer across evidence regimes fails because the meaning of several uncertainty features changes across datasets. The most promising future work is lightweight domain adaptation, stronger qualitative failure analysis, and feature designs that preserve signal meaning across regimes more reliably.
+      We built the feature extraction system, trained standalone detectors for PHANTOM and WikiQA, compared calibration methods, froze abstention rules, and evaluated transfer in both directions. The takeaway is: combining uncertainty and groundedness works in-domain, especially on PHANTOM, but transfer across evidence regimes fails because the meaning of several uncertainty features changes across datasets. The most promising future work is lightweight domain adaptation, stronger qualitative failure analysis, and feature designs that preserve signal meaning across regimes more reliably.
     </p>
 
     <hr>
