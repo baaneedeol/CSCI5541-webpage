@@ -313,25 +313,25 @@
       WikiQA is more mixed. The full pipeline still runs end to end, but the feature story is less clean, and the best final calibrator is different. On WikiQA, isotonic regression performs better than Platt scaling for the final calibration metrics.
     </p>
 
-    <p class="sys-img result-figure"><img src="./files/wikiqa_1300_baseline_metric_bars.png" alt="WikiQA baseline comparison"></p>
+    <p class="sys-img result-figure"><img src="./files/wikiqa_1300_baseline_metric_bars.png?v=20260423" alt="WikiQA baseline comparison"></p>
 
     <p>
       Figure 5 shows the WikiQA baseline comparison. Token uncertainty is the strongest single feature here, and the combined model does not show the same clean advantage seen on PHANTOM. That is one sign that WikiQA is the harder regime.
     </p>
 
-    <p class="sys-img result-figure"><img src="./files/wikiqa_1300_tuned_logreg_coefficients.png" alt="WikiQA learned coefficients"></p>
+    <p class="sys-img result-figure"><img src="./files/wikiqa_1300_tuned_logreg_coefficients.png?v=20260423" alt="WikiQA learned coefficients"></p>
 
     <p>
       Figure 6 shows the WikiQA learned coefficients. Groundedness still lowers risk, but the uncertainty features are less stable than on PHANTOM. This is one reason the WikiQA result is weaker and more mixed.
     </p>
 
-    <p class="sys-img compact-figure"><img src="./files/wikiqa_1300_risk_coverage_curve.png" alt="WikiQA risk coverage curve"></p>
+    <p class="sys-img compact-figure"><img src="./files/wikiqa_1300_risk_coverage_curve.png?v=20260423" alt="WikiQA risk coverage curve"></p>
 
     <p>
       Figure 7 shows the WikiQA risk-coverage curve. The curve still trends in the right direction, but the change is smaller than on PHANTOM. This matches the weaker abstention gains on WikiQA.
     </p>
 
-    <p class="sys-img compact-figure"><img src="./files/wikiqa_1300_reliability_comparison_test.png" alt="WikiQA calibration comparison"></p>
+    <p class="sys-img compact-figure"><img src="./files/wikiqa_1300_reliability_comparison_test.png?v=20260423" alt="WikiQA calibration comparison"></p>
 
     <p>
       Figure 8 shows the WikiQA calibration comparison. This figure matters because it explains why the final calibrator differs by dataset. PHANTOM uses Platt scaling, but WikiQA uses isotonic regression.
