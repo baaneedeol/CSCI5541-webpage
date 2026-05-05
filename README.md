@@ -42,14 +42,4 @@ The supporting analysis and reports live in the main project repo:
 
 - https://github.com/chinmayarvind23/Risk-Adjusted-Hallucination-Detection
 
-## Editing
-
-To update the page:
-
-1. Edit [index.html](C:/Users/chinm/Documents/coursework/5541/project/CSCI5541-webpage/index.html)
-2. Update or replace figures in [files/](C:/Users/chinm/Documents/coursework/5541/project/CSCI5541-webpage/files)
-3. Keep layout changes minimal so the page stays consistent with the course template
-
-## Notes
-
-- Can open the link on github deployments.
+Please open the link on github deployments to see the live website.
