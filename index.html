@@ -79,6 +79,15 @@
           </span>
           <span class="link-block">
             <a
+              href="https://github.com/chinmayarvind23/Risk-Adjusted-Hallucination-Detection/blob/main/results/FULL_RESULTS_SUMMARY.md"
+              target="_blank"
+              class="external-link button is-normal is-rounded is-dark is-outlined"
+            >
+              <span>Full Results Summary</span>
+            </a>
+          </span>
+          <span class="link-block">
+            <a
               href="https://github.com/baaneedeol/CSCI5541-webpage"
               target="_blank"
               class="external-link button is-normal is-rounded is-dark is-outlined"
@@ -132,7 +141,7 @@
 
     <h2 id="abstract">Abstract</h2>
     <p>
-      Large Language Models can produce fluent but unsupported answers, which is dangerous in settings where users need evidence-backed responses. We build a risk-adjusted hallucination detection pipeline that predicts whether a generated answer is unsupported by the provided evidence, calibrates that risk score, and abstains when risk is high. The detector combines four signals: token uncertainty, self-consistency disagreement, semantic entropy, and groundedness. We evaluate the full pipeline on two evidence regimes, PHANTOM and WikiQA, and we also test frozen transfer in both directions. The main result is that the standalone detector works best on PHANTOM, calibration and abstention are most useful on PHANTOM, and transfer fails in both directions because several uncertainty features change meaning across datasets while groundedness remains the most stable signal.
+      Large Language Models can produce fluent but unsupported answers, which is dangerous in settings where users need evidence-backed responses. We build a risk-adjusted hallucination detection pipeline that predicts whether a generated answer is unsupported by the provided evidence, calibrates that risk score, and abstains when risk is high. The detector combines four signals: token uncertainty, self-consistency disagreement, semantic entropy, and groundedness. We evaluate the full pipeline on two evidence regimes, PHANTOM and WikiQA, and we also test frozen transfer in both directions. The strongest in-domain result is on PHANTOM, where the detector reaches AUROC 0.7730, AUPRC 0.6451, and selective accuracy 0.7863 at 81.85% coverage. WikiQA remains meaningful in-domain, but the margin over single-feature baselines is smaller, the feature behavior is less stable, and abstention gains are limited. Transfer fails in both directions because several uncertainty features change meaning across datasets while groundedness remains the most stable signal.
     </p>
 
     <hr>
@@ -148,7 +157,7 @@
     <h3 id="pipeline-summary">Pipeline Summary</h3>
 
     <p>
-      Inputs are question-context pairs from two regimes: PHANTOM long-context QA and WikiQA with retrieved Wikipedia evidence. For each example, <code>qwen3:8b</code> generates a served answer and <code>k=5</code> sampled answers. We then compute token uncertainty, self-consistency disagreement, semantic entropy, and evidence consistency. Labels are produced by a stronger judge model, and groundedness is computed separately with NLI so the feature pipeline is not the same mechanism as the labeler. We train a logistic regression detector on the feature table, compare calibration methods, freeze the final detector bundle, and evaluate abstention and transfer.
+      Inputs are question-context pairs from two regimes: PHANTOM long-context QA and WikiQA with retrieved Wikipedia evidence. For each example, <code>qwen3:8b</code> generates a served answer and <code>k=5</code> sampled answers. We then compute token uncertainty, self-consistency disagreement, semantic entropy, and evidence groundedness. Labels are produced by a stronger judge model, and groundedness is computed separately with NLI so the feature pipeline is not the same mechanism as the labeler. We train a logistic regression detector on the feature table, compare calibration methods, freeze the final detector bundle, and evaluate abstention and transfer. For transfer, the source detector, source calibration, and source abstention threshold stay fixed, and the target feature table is standardized with the saved source training statistics.
     </p>
 
     <hr>
@@ -191,7 +200,7 @@
       <li><b>Token uncertainty:</b> mean token negative log-likelihood from generation log probabilities.</li>
       <li><b>Self-consistency disagreement:</b> disagreement across sampled responses using sentence-embedding similarity.</li>
       <li><b>Semantic entropy:</b> meaning-level uncertainty computed from entailment-based clustering of sampled answers.</li>
-      <li><b>Evidence consistency:</b> sentence-level groundedness against the provided or retrieved evidence.</li>
+      <li><b>Evidence groundedness:</b> sentence-level groundedness against the provided or retrieved evidence.</li>
     </ul>
 
     <p>
@@ -228,7 +237,7 @@
     <h3 id="standalone-results">Standalone Detector Results</h3>
 
     <p>
-      Table 1 summarizes the final standalone results. AUROC, AUPRC, accuracy, precision, recall, and F1 come from the tuned detector reports. ECE, Brier, coverage, and selective accuracy come from the final calibrated abstention runs. The PHANTOM detector is the strongest success case. WikiQA still supports the full pipeline, but the detector is weaker, the learned weights are less intuitive, and the abstention gains are much smaller.
+      Table 1 summarizes the final standalone results. AUROC, AUPRC, accuracy, precision, recall, and F1 come from the tuned detector reports. ECE, Brier, coverage, and selective accuracy come from the final calibrated abstention runs. PHANTOM is the strongest success case. WikiQA remains meaningful in-domain, but the detector is weaker, the margin over single-feature baselines is smaller, and abstention gains are much more limited.
     </p>
 
     <table class="results-table">
@@ -278,7 +287,7 @@
           <td style="text-align: center">0.7566</td>
         </tr>
       </tbody>
-      <caption>Table 1. Final standalone results for PHANTOM and WikiQA. PHANTOM is the strongest in-domain result. WikiQA still supports the pipeline, but the detector is weaker and abstention helps less.</caption>
+      <caption>Table 1. Final standalone results for PHANTOM and WikiQA. PHANTOM is the strongest in-domain result. WikiQA remains meaningful, but the detector is weaker and abstention helps less.</caption>
     </table>
 
     <p>
@@ -310,13 +319,13 @@
     </p>
 
     <p>
-      WikiQA is more mixed. The full pipeline still runs end to end, but the feature story is less clean, and the best final calibrator is different. On WikiQA, isotonic regression performs better than Platt scaling for the final calibration metrics.
+      WikiQA is more mixed. The full pipeline still runs end to end, but the feature story is less clean and the best final calibrator is different. On WikiQA, isotonic regression performs better than Platt scaling for the final calibration metrics.
     </p>
 
     <p class="sys-img result-figure"><img src="./files/wikiqa_1300_baseline_metric_bars.png?v=20260423" alt="WikiQA baseline comparison"></p>
 
     <p>
-      Figure 5 shows the WikiQA baseline comparison. Token uncertainty is the strongest single feature here, and the combined model does not show the same clean advantage seen on PHANTOM. That is one sign that WikiQA is the harder regime.
+      Figure 5 shows the WikiQA baseline comparison. Token uncertainty is the strongest single feature here, and the combined model does not show the same clean advantage seen on PHANTOM. The combined detector remains competitive and is strongest by F1, but the margin is clearly smaller than on PHANTOM.
     </p>
 
     <p class="sys-img result-figure"><img src="./files/wikiqa_1300_tuned_logreg_coefficients.png?v=20260423" alt="WikiQA learned coefficients"></p>
@@ -439,7 +448,7 @@
     </p>
 
     <p>
-      Third, ranking already fails before thresholding. In transfer, raw AUROC falls below 0.45 in both directions. Calibration then gets worse on top of that. In both transfer directions, the calibrated ECE and Brier score are worse than the raw transferred values. So the failure is not just bad threshold selection. Ranking breaks first, then calibration also breaks.
+      Third, ranking already fails before thresholding. In transfer, raw AUROC falls below 0.45 in both directions. Calibration then gets worse on top of that. So the failure is not just bad threshold selection. Ranking breaks first, then calibration also breaks.
     </p>
 
     <p>
@@ -450,12 +459,65 @@
       Finally, many unsupported target examples still pass below the frozen source threshold. In the deeper diagnostics, about 90.4% of unsupported WikiQA target cases remain below the frozen PHANTOM threshold, and about 83.1% of unsupported PHANTOM target cases remain below the frozen WikiQA threshold. This is a concrete transfer-time version of the confidently wrong problem.
     </p>
 
+    <h3 id="qualitative-analysis">Qualitative Error Analysis</h3>
+
+    <p>
+      The qualitative exports show the same pattern at the example level. PHANTOM in-domain rejects a meaningful share of unsupported answers while keeping most supported ones. WikiQA in-domain is much more permissive, and both transfer settings still leave many unsupported answers answered.
+    </p>
+
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th style="text-align: center"><strong>Setting</strong></th>
+          <th style="text-align: center"><strong>Unsupported Answered</strong></th>
+          <th style="text-align: center"><strong>Unsupported Abstained</strong></th>
+          <th style="text-align: center"><strong>Supported Answered</strong></th>
+          <th style="text-align: center"><strong>Supported Abstained</strong></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align: center"><strong>PHANTOM in-domain</strong></td>
+          <td style="text-align: center">53</td>
+          <td style="text-align: center">43</td>
+          <td style="text-align: center">195</td>
+          <td style="text-align: center">12</td>
+        </tr>
+        <tr>
+          <td style="text-align: center"><strong>WikiQA in-domain</strong></td>
+          <td style="text-align: center">46</td>
+          <td style="text-align: center">1</td>
+          <td style="text-align: center">143</td>
+          <td style="text-align: center">6</td>
+        </tr>
+        <tr>
+          <td style="text-align: center"><strong>PHANTOM → WikiQA</strong></td>
+          <td style="text-align: center">244</td>
+          <td style="text-align: center">26</td>
+          <td style="text-align: center">956</td>
+          <td style="text-align: center">74</td>
+        </tr>
+        <tr>
+          <td style="text-align: center"><strong>WikiQA → PHANTOM</strong></td>
+          <td style="text-align: center">500</td>
+          <td style="text-align: center">102</td>
+          <td style="text-align: center">1213</td>
+          <td style="text-align: center">198</td>
+        </tr>
+      </tbody>
+      <caption>Table 3. Qualitative case counts from the exported per-example files. Both transfer settings still fail to detect many unsupported answers.</caption>
+    </table>
+
+    <p>
+      Representative failures are consistent with the final report. On PHANTOM, one failure returns only <code>$661,395</code> for a related-party debt question even though the evidence implies a much larger total, which shows that low uncertainty and high groundedness can still miss aggregation errors in long contexts. On WikiQA, the question <i>Where does Apple operate?</i> receives a broad world-knowledge answer even though the retrieved evidence is actually about iOS, which shows a retrieval mismatch. Under transfer, the PHANTOM bundle can assign low risk to unsupported WikiQA answers such as <i>The answer is not supported by the context.</i>, while the WikiQA bundle can assign calibrated risk 0.0 to clearly wrong PHANTOM numeric answers such as <code>585</code> when the ground truth is <code>611</code>.
+    </p>
+
     <h3 id="main-takeaways">Main Takeaways</h3>
 
     <ul>
       <li><b>PHANTOM is the strongest positive result.</b> The detector is coherent, calibration is useful, and abstention improves the quality of kept answers.</li>
-      <li><b>WikiQA still supports the pipeline, but it behaves differently.</b> The detector is weaker, the coefficient interpretations are less straightforward, and isotonic regression works better than Platt scaling.</li>
-      <li><b>Transfer in both directions is poor:</b> PHANTOM -> WikiQA and WikiQA -> PHANTOM.</li>
+      <li><b>WikiQA remains meaningful, but it behaves differently.</b> The detector is weaker, the coefficient interpretations are less straightforward, and isotonic regression works better than Platt scaling.</li>
+      <li><b>Transfer in both directions is poor:</b> PHANTOM → WikiQA and WikiQA → PHANTOM.</li>
       <li><b>Groundedness is the most stable feature family.</b> It keeps the same sign across both datasets.</li>
       <li><b>Uncertainty features are more regime-dependent.</b> Their label relationship and learned coefficients shift across datasets.</li>
     </ul>
