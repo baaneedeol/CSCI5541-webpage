@@ -6,9 +6,21 @@ This repository contains the static project website for:
 
 The site is a single-page static HTML page backed by local CSS and image assets.
 
+Website repository:
+
+- https://github.com/baaneedeol/CSCI5541-webpage
+
+Main project repository:
+
+- https://github.com/chinmayarvind23/Risk-Adjusted-Hallucination-Detection
+
 Shared data folder:
 
 - https://drive.google.com/drive/folders/1aHTuwsl0TuDfcwWspzaYjyUueDXrDSw5?usp=sharing
+
+Poster:
+
+- https://drive.google.com/file/d/1ZShXs6oNtWmFwnbwolwB9QafHuGERSPC/view?usp=sharing
 
 ## Files
 
@@ -28,7 +40,7 @@ The site content reflects the final project state from the main project reposito
 
 The supporting analysis and reports live in the main project repo:
 
-- `Risk-Adjusted-Hallucination-Detection`
+- https://github.com/chinmayarvind23/Risk-Adjusted-Hallucination-Detection
 
 ## Editing
 

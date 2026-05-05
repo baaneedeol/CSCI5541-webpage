@@ -79,20 +79,11 @@
           </span>
           <span class="link-block">
             <a
-              href="https://github.com/chinmayarvind23/Risk-Adjusted-Hallucination-Detection/tree/main/code"
+              href="https://github.com/baaneedeol/CSCI5541-webpage"
               target="_blank"
               class="external-link button is-normal is-rounded is-dark is-outlined"
             >
-              <span>Code</span>
-            </a>
-          </span>
-          <span class="link-block">
-            <a
-              href="https://github.com/chinmayarvind23/Risk-Adjusted-Hallucination-Detection/blob/main/FULL_RESULTS_SUMMARY.md"
-              target="_blank"
-              class="external-link button is-normal is-rounded is-dark is-outlined"
-            >
-              <span>Full Results Summary</span>
+              <span>Website Repo</span>
             </a>
           </span>
           <span class="link-block">
@@ -102,6 +93,15 @@
               class="external-link button is-normal is-rounded is-dark is-outlined"
             >
               <span>Data</span>
+            </a>
+          </span>
+          <span class="link-block">
+            <a
+              href="https://drive.google.com/file/d/1ZShXs6oNtWmFwnbwolwB9QafHuGERSPC/view?usp=sharing"
+              target="_blank"
+              class="external-link button is-normal is-rounded is-dark is-outlined"
+            >
+              <span>Poster</span>
             </a>
           </span>
           <span class="link-block">
@@ -159,7 +159,7 @@
       <b>What did you try to do? What problem did you try to solve?</b>
     </p>
     <p>
-      We wanted to detect when an answer is unsupported by the evidence provided to the model, then use that score to avoid answering the riskiest cases. The project is about reliability, and raw answer generation quality.
+      We wanted to detect when an answer is unsupported by the evidence provided to the model, then use that score to avoid answering the riskiest cases. The project is about reliability, over raw answer generation quality.
     </p>
 
     <p>
@@ -393,19 +393,19 @@
     <p class="sys-img compact-figure"><img src="./files/phantom_to_wikiqa_reliability_diagram.png" alt="PHANTOM to WikiQA reliability diagram"></p>
 
     <p>
-      Figure 9 shows PHANTOM to WikiQA transfer. The reliability diagram is worse than the in-domain diagrams. This means the source-calibrated score is no longer behaving like a useful risk probability on the target domain.
+      Figure 9 shows PHANTOM to WikiQA transfer. The reliability diagram is worse than the in-domain diagrams. This means the source-calibrated score no longer behaves like a useful risk probability on the target domain.
     </p>
 
     <p class="sys-img compact-figure"><img src="./files/wikiqa_to_phantom_reliability_diagram.png" alt="WikiQA to PHANTOM reliability diagram"></p>
 
     <p>
-      Figure 10 shows WikiQA to PHANTOM transfer. The same pattern appears in the reverse direction. This means the transfer problem is not limited to one source dataset and both directions break.
+      Figure 10 shows WikiQA to PHANTOM transfer. The same pattern appears in the reverse direction. This means the transfer problem is not limited to one source dataset and both directions fail.
     </p>
 
     <h3 id="deeper-analysis">Deeper Analysis of Why Transfer Fails</h3>
 
     <p>
-      The strongest result is not only that transfer is poor. It is that we now have evidence for <b>why</b> transfer is poor.
+      The strongest result is not only that transfer is poor, but we also have evidence for <b>why</b> transfer is poor.
     </p>
 
     <p>
@@ -454,8 +454,8 @@
 
     <ul>
       <li><b>PHANTOM is the strongest positive result.</b> The detector is coherent, calibration is useful, and abstention improves the quality of kept answers.</li>
-      <li><b>WikiQA still supports the pipeline, but it behaves differently.</b> The detector is weaker, the coefficient stories is are less straightforward, and isotonic regressionworks better than Platt scaling.</li>
-      <li><b>Transfer in both directions is poor.</b> PHANTOM -> WikiQA and WikiQA -> PHANTOM.</li>
+      <li><b>WikiQA still supports the pipeline, but it behaves differently.</b> The detector is weaker, the coefficient interpretations are less straightforward, and isotonic regression works better than Platt scaling.</li>
+      <li><b>Transfer in both directions is poor:</b> PHANTOM -> WikiQA and WikiQA -> PHANTOM.</li>
       <li><b>Groundedness is the most stable feature family.</b> It keeps the same sign across both datasets.</li>
       <li><b>Uncertainty features are more regime-dependent.</b> Their label relationship and learned coefficients shift across datasets.</li>
     </ul>
